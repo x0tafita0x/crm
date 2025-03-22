@@ -51,6 +51,7 @@ public class BudgetController {
         try {
             if (bindingResult.hasErrors()) {
                 model.addAttribute("customers", customerRepository.findAll());
+                model.addAttribute("budgetTypes", budgetTypeRepository.findAll());
                 return "budget/create-budget";
             }
             budgetRepository.save(budget);
