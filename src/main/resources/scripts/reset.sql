@@ -1,5 +1,4 @@
-SET FOREIGN_KEY_CHECKS = 0;
-
-DELETE FROM employee;
-
-SET FOREIGN_KEY_CHECKS = 1;
+delete from budget;
+delete from expense;
+delete from trigger_lead;
+delete from trigger_ticket;

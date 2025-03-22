@@ -29,6 +29,7 @@ public class DataServiceImpl implements DataService {
     @Transactional
     public void reset() throws Exception {
         try {
+            jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
             Resource resource = new ClassPathResource(resetScript);
             String sql = new String(Files.readAllBytes(Paths.get(resource.getURI())));
 
