@@ -101,7 +101,9 @@
 
                                 <label class="m-t-20" for="customerId">Customer:</label>
                                 <div class="input-group">
-                                    <input class="form-control" id="customerId" type="text" th:field="*{customer.customerId}" th:value="${customer.customerId}" th:text="${customer.name}" aria-label="Disabled input example" disabled readonly>
+                                    <select name="customerId" id="customerId" class="form-control" th:field="*{customer.customerId}">
+                                        <option th:text="${customer.name}" th:value="${customer.customerId}"></option>
+                                    </select>
                                 </div>
 
                                 <label class="m-t-20" for="budgetId">Budget:</label>

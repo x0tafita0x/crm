@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,9 +33,14 @@ public class DataServiceImpl implements DataService {
         try {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
             Resource resource = new ClassPathResource(resetScript);
-            String sql = new String(Files.readAllBytes(Paths.get(resource.getURI())));
 
-            jdbcTemplate.execute(sql);
+            BufferedReader reader = new BufferedReader(new FileReader(Paths.get(resource.getURI()).toFile().getAbsolutePath()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jdbcTemplate.execute(line);
+            }
+
+            jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
         } catch (Exception e) {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
             throw e;

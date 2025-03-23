@@ -23,3 +23,15 @@ create table alert_settings (
     alert_id int primary key auto_increment,
     rate decimal(5,2)
 );
+
+ALTER TABLE trigger_lead
+ADD COLUMN expense_id INT,
+ADD CONSTRAINT fk_expense
+FOREIGN KEY (expense_id)
+REFERENCES expense(expense_id);
+
+ALTER TABLE trigger_ticket
+ADD COLUMN expense_id INT,
+ADD CONSTRAINT fk_expense_ticket
+FOREIGN KEY (expense_id)
+REFERENCES expense(expense_id);
