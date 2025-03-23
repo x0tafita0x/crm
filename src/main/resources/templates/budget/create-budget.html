@@ -83,19 +83,23 @@
                                     <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" autocomplete="off"></span>
                                 </div>
 
-<!--                                <label class="m-t-20" for="description">description:</label>-->
-<!--                                <div class="input-group">-->
-<!--                                    <input type="text" id="description" th:field="*{description}" class="form-control">-->
-<!--                                </div>-->
-<!--                                <div class="input-group">-->
-<!--                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}" autocomplete="off"></span>-->
-<!--                                </div>-->
-
-                                <label class="m-t-20" for="budgetTypeId">Budget Types:</label>
+                                <label class="m-t-20" for="description">description:</label>
                                 <div class="input-group">
-                                    <select name="budgetTypeId" id="budgetTypeId" class="form-control" th:field="*{budgetType.budgetTypeId}">
-                                        <option th:each="budgetType : ${budgetTypes}" th:text="${budgetType.budgetTypeName}" th:value="${budgetType.budgetTypeId}"></option>
-                                    </select>
+                                    <input type="text" id="description" th:field="*{description}" class="form-control">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}" autocomplete="off"></span>
+                                </div>
+
+                                <label class="m-t-20" for="startDate">Created At:</label>
+                                <div class="input-group">
+                                    <input type="text" id="startDate" th:field="*{createdAt}" class="form-control mydatepicker" placeholder="YYYY-MM-DD" data-date-format="yyyy-mm-dd" autocomplete="off">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="icon-calender"></i></span>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('createdAt')}" th:errors="*{createdAt}"></span>
                                 </div>
 
                                 <label class="m-t-20" for="customerId">Customer:</label>
