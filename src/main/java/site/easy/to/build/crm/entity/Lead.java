@@ -15,6 +15,10 @@ public class Lead {
     @Column(name = "lead_id")
     private int leadId;
 
+    @ManyToOne
+    @JoinColumn(name = "expense_id", nullable = true)
+    private Expense expense;
+
     @Column(name = "name")
     @NotBlank(message = "Name is required")
     private String name;
@@ -79,6 +83,14 @@ public class Lead {
         this.employee = employee;
         this.customer = customer;
         this.createdAt = createdAt;
+    }
+
+    public Expense getExpense() {
+        return expense;
+    }
+
+    public void setExpense(Expense expense) {
+        this.expense = expense;
     }
 
     public int getLeadId() {

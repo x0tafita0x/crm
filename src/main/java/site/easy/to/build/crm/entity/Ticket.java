@@ -15,6 +15,10 @@ public class Ticket {
     @Column(name = "ticket_id")
     private int ticketId;
 
+    @ManyToOne
+    @JoinColumn(name = "expense_id", nullable = true)
+    private Expense expense;
+
     @Column(name = "subject")
     @NotBlank(message = "Subject is required")
     private String subject;
@@ -60,6 +64,14 @@ public class Ticket {
         this.employee = employee;
         this.customer = customer;
         this.createdAt = createdAt;
+    }
+
+    public Expense getExpense() {
+        return expense;
+    }
+
+    public void setExpense(Expense expense) {
+        this.expense = expense;
     }
 
     public int getTicketId() {

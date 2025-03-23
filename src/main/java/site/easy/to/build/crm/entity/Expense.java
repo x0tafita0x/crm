@@ -1,15 +1,17 @@
 package site.easy.to.build.crm.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "expense")
+@Getter
+@Setter
 public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +21,9 @@ public class Expense {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    @NotNull
+    private String description;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     @NotNull(message = "Amount is required")
@@ -31,43 +36,14 @@ public class Expense {
     @JoinColumn(name = "budget_id")
     private Budget budget;
 
-    public int getExpenseId() {
-        return expenseId;
-    }
+    @Column(name = "created_at", nullable = false)
+    @NotNull(message = "createdAt required")
+    private LocalDate createdAt;
 
-    public void setExpenseId(int expenseId) {
-        this.expenseId = expenseId;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public Budget getBudget() {
-        return budget;
-    }
-
-    public void setBudget(Budget budget) {
-        this.budget = budget;
-    }
-
-    public Expense(int expenseId, Customer customer, BigDecimal amount, Budget budget) {
+    public Expense(int expenseId, Customer customer, BigDecimal amount, BudgetType budgetType) {
         this.expenseId = expenseId;
         this.customer = customer;
         this.amount = amount;
-        this.budget = budget;
     }
 
     public Expense() {
