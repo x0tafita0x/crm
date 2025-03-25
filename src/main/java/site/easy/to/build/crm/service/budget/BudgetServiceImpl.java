@@ -1,8 +1,7 @@
 package site.easy.to.build.crm.service.budget;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import site.easy.to.build.crm.entity.Expense;
+import site.easy.to.build.crm.entity.Budget;
 import site.easy.to.build.crm.entity.Lead;
 import site.easy.to.build.crm.entity.Ticket;
 import site.easy.to.build.crm.entity.settings.AlertSettings;
@@ -10,66 +9,82 @@ import site.easy.to.build.crm.repository.LeadRepository;
 import site.easy.to.build.crm.repository.TicketRepository;
 import site.easy.to.build.crm.repository.settings.AlertSettingsRepository;
 import site.easy.to.build.crm.repository.BudgetRepository;
-import site.easy.to.build.crm.repository.ExpenseRepository;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class BudgetServiceImpl implements BudgetService {
     private final BudgetRepository budgetRepository;
-    private final ExpenseRepository expenseRepository;
     private final AlertSettingsRepository alertSettingsRepository;
     private final LeadRepository leadRepository;
     private final TicketRepository ticketRepository;
 
-    public BudgetServiceImpl(BudgetRepository budgetRepository,
-                             ExpenseRepository expenseRepository, AlertSettingsRepository alertSettingsRepository,
+    public BudgetServiceImpl(BudgetRepository budgetRepository, AlertSettingsRepository alertSettingsRepository,
                              LeadRepository leadRepository, TicketRepository ticketRepository) {
         this.budgetRepository = budgetRepository;
-        this.expenseRepository = expenseRepository;
         this.alertSettingsRepository = alertSettingsRepository;
         this.leadRepository = leadRepository;
         this.ticketRepository = ticketRepository;
     }
 
     @Override
-    public void saveTicketExpense(Expense expense, Ticket ticket) {
-        expense = expenseRepository.save(expense);
-        ticket.setExpense(expense);
-        if (ticketRepository.findById(ticket.getTicketId()).isPresent()) {
-            ticketRepository.save(ticket);
+    public List<Budget> getBudgetBetween(LocalDateTime startDate, LocalDateTime endDate){
+        if (startDate == null && endDate == null) {
+            return budgetRepository.findAll();
+        } else if (startDate == null) {
+            return budgetRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(endDate);
+        } else if (endDate == null) {
+            return budgetRepository.findByCreatedAtAfterOrderByCreatedAtDesc(startDate);
+        } else {
+            return budgetRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
         }
     }
 
     @Override
-    public void saveLeadExpense(Expense expense, Lead lead) {
-        expense = expenseRepository.save(expense);
-        lead.setExpense(expense);
-        if (leadRepository.findById(lead.getLeadId()).isPresent()) {
-            leadRepository.save(lead);
-        }
-    }
-
-    @Override
-    public boolean alertRateExceeded(Expense expense) {
-        BigDecimal previousExpense = expenseRepository.previousExpenses(expense.getCustomer().getCustomerId(),
-                expense.getCreatedAt(), expense.getBudget().getBudgetId());
-        BigDecimal previousBudget = budgetRepository.previousBudget(expense.getCustomer().getCustomerId(),
-                expense.getCreatedAt());
-
+    public boolean alertRateExceeded(Object action) {
+        double limit, previousExpense, previousBudget;
         AlertSettings alertSettings = alertSettingsRepository.getSettings();
-        double limit = previousBudget.doubleValue() * (alertSettings.getRate() / 100);
 
-        return previousExpense.doubleValue() >= limit;
+        if (action instanceof Ticket ticket) {
+            previousExpense = ticketRepository.findTotalDepenseBeforeCreatedAt(ticket.getCreatedAt(), ticket.getCustomer());
+            previousBudget = budgetRepository.previousBudget(ticket.getCustomer(), ticket.getCreatedAt());
+
+            limit = previousBudget * (alertSettings.getRate() / 100);
+        }
+        else if (action instanceof Lead lead) {
+            previousExpense = leadRepository.findTotalDepenseBeforeCreatedAt(lead.getCreatedAt(), lead.getCustomer());
+            previousBudget = budgetRepository.previousBudget(lead.getCustomer(), lead.getCreatedAt());
+
+            limit = previousBudget * (alertSettings.getRate() / 100);
+        }
+        else {
+            throw new IllegalArgumentException("action should be Ticket or Lead");
+        }
+
+        return previousExpense >= limit;
     }
 
     @Override
-    public boolean budgetExceeded(Expense expense) {
-        BigDecimal previousExpense = expenseRepository.previousExpenses(expense.getCustomer().getCustomerId(),
-                expense.getCreatedAt(), expense.getBudget().getBudgetId());
-        BigDecimal previousBudget = budgetRepository.previousBudget(expense.getCustomer().getCustomerId(),
-                expense.getCreatedAt());
+    public boolean budgetExceeded(Object action) {
+        double newExpense, previousExpense, previousBudget;
 
-        return previousExpense.doubleValue() + expense.getAmount().doubleValue() >= previousBudget.doubleValue();
+        if (action instanceof Ticket ticket) {
+            previousExpense = ticketRepository.findTotalDepenseBeforeCreatedAt(ticket.getCreatedAt(), ticket.getCustomer());
+            previousBudget = budgetRepository.previousBudget(ticket.getCustomer(), ticket.getCreatedAt());
+
+            newExpense = previousExpense + ticket.getDepense().doubleValue();
+        }
+        else if (action instanceof Lead lead) {
+            previousExpense = leadRepository.findTotalDepenseBeforeCreatedAt(lead.getCreatedAt(), lead.getCustomer());
+            previousBudget = budgetRepository.previousBudget(lead.getCustomer(), lead.getCreatedAt());
+
+            newExpense = previousExpense + lead.getDepense().doubleValue();
+        }
+        else {
+            throw new IllegalArgumentException("action should be Ticket or Lead");
+        }
+
+        return newExpense >= previousBudget;
     }
 }

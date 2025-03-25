@@ -7,31 +7,21 @@ create table budget (
     foreign key (customer_id) references customer(customer_id)
 );
 
-create table expense (
-    expense_id int auto_increment,
-    customer_id int unsigned not null,
-    budget_id int,
-    description varchar(255),
-    amount decimal(15,2),
-    created_at date,
-    primary key (expense_id),
-    foreign key (customer_id) references customer(customer_id),
-    foreign key (budget_id) references budget(budget_id)
-);
-
 create table alert_settings (
     alert_id int primary key auto_increment,
     rate decimal(5,2)
 );
 
 ALTER TABLE trigger_lead
-ADD COLUMN expense_id INT,
-ADD CONSTRAINT fk_expense
-FOREIGN KEY (expense_id)
-REFERENCES expense(expense_id);
+ADD COLUMN expense_amount decimal(15,2);
 
 ALTER TABLE trigger_ticket
-ADD COLUMN expense_id INT,
-ADD CONSTRAINT fk_expense_ticket
-FOREIGN KEY (expense_id)
-REFERENCES expense(expense_id);
+ADD COLUMN expense_amount decimal(15,2);
+
+create table login_token (
+    token_id int primary key auto_increment,
+    token varchar(255),
+    createdAt datetime,
+    expireAt datetime,
+    user_id int unsigned references users(id)
+);

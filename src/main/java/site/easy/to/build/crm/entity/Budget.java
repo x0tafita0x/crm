@@ -26,10 +26,6 @@ public class Budget {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @NotNull
-    @Column(name = "description")
-    private String description;
-
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     @NotNull(message = "Amount is required")
     @Digits(integer = 10, fraction = 2, message = "Amount must be a valid number with up to 2 decimal places")
@@ -38,7 +34,7 @@ public class Budget {
     private BigDecimal amount;
 
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     public Budget() {
     }
@@ -46,7 +42,6 @@ public class Budget {
     public Budget(int budgetId, Customer customer, String description, BigDecimal amount) {
         this.budgetId = budgetId;
         this.customer = customer;
-        this.description = description;
         this.amount = amount;
     }
 }

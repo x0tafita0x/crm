@@ -7,6 +7,7 @@ import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.repository.LeadRepository;
 import site.easy.to.build.crm.entity.Lead;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -51,7 +52,18 @@ public class LeadServiceImpl implements LeadService {
     public void delete(Lead lead) {
         leadRepository.delete(lead);
     }
-
+    @Override
+    public List<Lead> getLeadBetween(LocalDateTime startDate, LocalDateTime endDate){
+        if (startDate == null && endDate == null) {
+            return leadRepository.findAll();
+        } else if (startDate == null) {
+            return leadRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(endDate);
+        } else if (endDate == null) {
+            return leadRepository.findByCreatedAtAfterOrderByCreatedAtDesc(startDate);
+        } else {
+            return leadRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
+        }
+    }
     @Override
     public List<Lead> getRecentLeadsByEmployee(int employeeId, int limit) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -93,5 +105,10 @@ public class LeadServiceImpl implements LeadService {
     @Override
     public long countByCustomerId(int customerId) {
         return leadRepository.countByCustomerCustomerId(customerId);
+    }
+
+    @Override
+    public double getTotalLeadAmountForCustomer(Customer customer) {
+        return leadRepository.findTotalAmountByCustomer(customer);
     }
 }

@@ -2,6 +2,7 @@ package site.easy.to.build.crm.service.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import site.easy.to.build.crm.entity.Role;
 import site.easy.to.build.crm.repository.UserRepository;
 import site.easy.to.build.crm.entity.User;
 
@@ -12,6 +13,16 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     UserRepository userRepository;
+
+    @Override
+    public boolean isManager(User user) {
+        for (Role role : user.getRoles()) {
+            if (role.getName().equals("ROLE_MANAGER")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public long countAllUsers() {

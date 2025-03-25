@@ -85,7 +85,9 @@
                                         <th>Status</th>
                                         <th>Customer</th>
                                         <th>Assigned Employee</th>
-                                        <th>Expense</th>
+
+                                        <th>Depense</th>
+
                                         <th>Show</th>
                                         <th>Edit</th>
                                         <th>Delete</th>
@@ -99,12 +101,9 @@
                                         <td th:text="${lead.status}"></td>
                                         <td th:text="${lead.customer.name}"></td>
                                         <td th:text="${lead.employee.username}"></td>
-                                        <td th:if="${lead.expense == null}">
-                                            <a th:href="${home + 'budget/lead/' + lead.leadId + '/create-expense'}" th:text="Add"></a>
-                                        </td>
-                                        <td th:unless="${lead.expense == null}">
-                                            <p th:text="${lead.expense?.amount}"></p>
-                                        </td>
+
+                                        <td th:text="${lead.depense}"></td>
+
                                         <td><a th:href="${home + 'employee/lead/show/' + lead.leadId}"><i class="fas fa-eye"></i></a></td>
                                         <td><a th:href="${home + 'employee/lead/update/' + lead.leadId}"><i class="fas fa-edit"></i></a></td>
                                         <td>

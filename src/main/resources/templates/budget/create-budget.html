@@ -83,13 +83,6 @@
                                     <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" autocomplete="off"></span>
                                 </div>
 
-                                <label class="m-t-20" for="description">description:</label>
-                                <div class="input-group">
-                                    <input type="text" id="description" th:field="*{description}" class="form-control">
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}" autocomplete="off"></span>
-                                </div>
 
                                 <label class="m-t-20" for="startDate">Created At:</label>
                                 <div class="input-group">

@@ -1,38 +1,44 @@
 package site.easy.to.build.crm.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.easy.to.build.crm.entity.Budget;
-import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.entity.Lead;
 import site.easy.to.build.crm.entity.Ticket;
+import site.easy.to.build.crm.google.model.gmail.Attachment;
 import site.easy.to.build.crm.repository.*;
 import site.easy.to.build.crm.service.budget.BudgetService;
+import site.easy.to.build.crm.service.lead.LeadService;
+import site.easy.to.build.crm.service.ticket.TicketService;
+import site.easy.to.build.crm.util.AuthorizationUtil;
+import site.easy.to.build.crm.util.FileUtil;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/budget")
 public class BudgetController {
     private final BudgetRepository budgetRepository;
     private final CustomerRepository customerRepository;
-    private final ExpenseRepository expenseRepository;
-    private final LeadRepository leadRepository;
+    private final LeadService leadService;
     private final TicketRepository ticketRepository;
-    private final BudgetService budgetService;
+    private final FileUtil fileUtil;
 
     public BudgetController(BudgetRepository budgetRepository, CustomerRepository customerRepository,
-                            ExpenseRepository expenseRepository, LeadRepository leadRepository, TicketRepository ticketRepository, BudgetService budgetService) {
+                            LeadService leadService, TicketRepository ticketRepository,
+                            FileUtil fileUtil) {
         this.budgetRepository = budgetRepository;
         this.customerRepository = customerRepository;
-        this.expenseRepository = expenseRepository;
-        this.leadRepository = leadRepository;
+        this.leadService = leadService;
         this.ticketRepository = ticketRepository;
-        this.budgetService = budgetService;
+        this.fileUtil = fileUtil;
     }
 
     @GetMapping("/all-budget")
@@ -64,107 +70,6 @@ public class BudgetController {
         }
     }
 
-    @GetMapping("/all-expense")
-    public String allExpense(Model model) {
-        model.addAttribute("expenses", expenseRepository.findAll());
-        return "expense/all-expenses";
-    }
-
-    @GetMapping("/lead/{idLead}/create-expense")
-    public String createLeadExpense(Model model, @PathVariable int idLead) {
-        if (leadRepository.findById(idLead).isEmpty()) {
-            return "error/not-found";
-        }
-        Lead lead = leadRepository.findById(idLead).get();
-        model.addAttribute("customer", lead.getCustomer());
-        model.addAttribute("expense", new Expense());
-        model.addAttribute("budgets", budgetRepository.findBudgetsByCustomer(lead.getCustomer()));
-        model.addAttribute("form_url", "/budget/lead/" + idLead + "/create-expense");
-        return "expense/create-expense";
-    }
-
-    @PostMapping("/lead/{idLead}/create-expense")
-    public String createLeadExpense(@ModelAttribute("expense") Expense expense, BindingResult bindingResult,
-                                    Model model, @PathVariable int idLead, RedirectAttributes redirectAttributes,
-                                    HttpSession session) {
-        if (leadRepository.findById(idLead).isEmpty()) {
-            return "error/not-found";
-        }
-        Lead lead = leadRepository.findById(idLead).get();
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("customer", lead.getCustomer());
-            model.addAttribute("budgets", budgetRepository.findBudgetsByCustomer(lead.getCustomer()));
-            return "expense/create-expense";
-        }
-
-        try {
-            expense.setCustomer(lead.getCustomer());
-            if (budgetService.budgetExceeded(expense)) {
-                session.setAttribute("expense_insert", expense);
-                session.setAttribute("lead", lead);
-                return "redirect:/budget/confirm-expense";
-            }
-
-            budgetService.saveLeadExpense(expense, lead);
-
-            if (budgetService.alertRateExceeded(expense)) {
-                redirectAttributes.addFlashAttribute("alert", "taux d'alerte atteint");
-            }
-
-            return "redirect:/budget/all-expense";
-        } catch (Exception e) {
-            return "error/500";
-        }
-    }
-
-    @GetMapping("/ticket/{idTicket}/create-expense")
-    public String createTicketExpense(Model model, @PathVariable int idTicket) {
-        if (ticketRepository.findById(idTicket).isEmpty()) {
-            return "error/not-found";
-        }
-        Ticket ticket = ticketRepository.findById(idTicket).get();
-        model.addAttribute("customer", ticket.getCustomer());
-        model.addAttribute("expense", new Expense());
-        model.addAttribute("budgets", budgetRepository.findBudgetsByCustomer(ticket.getCustomer()));
-        model.addAttribute("form_url", "/budget/ticket/" + idTicket + "/create-expense");
-        return "expense/create-expense";
-    }
-
-    @PostMapping("/ticket/{idTicket}/create-expense")
-    public String createTicketExpense(@ModelAttribute("expense") @Validated Expense expense, BindingResult bindingResult,
-                                      Model model, @PathVariable int idTicket, RedirectAttributes redirectAttributes,
-                                      HttpSession session) {
-        if (ticketRepository.findById(idTicket).isEmpty()) {
-            return "error/not-found";
-        }
-        Ticket ticket = ticketRepository.findById(idTicket).get();
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("customer", ticket.getCustomer());
-            model.addAttribute("budgets", budgetRepository.findBudgetsByCustomer(ticket.getCustomer()));
-        }
-
-        try {
-            expense.setCustomer(ticket.getCustomer());
-            if (budgetService.budgetExceeded(expense)) {
-                session.setAttribute("expense_insert", expense);
-                session.setAttribute("ticket", ticket);
-                return "redirect:/budget/confirm-expense";
-            }
-
-            budgetService.saveTicketExpense(expense, ticket);
-
-            if (budgetService.alertRateExceeded(expense)) {
-                redirectAttributes.addFlashAttribute("alert", "taux d'alerte atteint");
-            }
-
-            return "redirect:/budget/all-expense";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "error/500";
-        }
-    }
 
     @GetMapping("/confirm-expense")
     public String confirmExpense(Model model) {
@@ -180,14 +85,31 @@ public class BudgetController {
     }
 
     @GetMapping("/validate-confirm")
-    public String validateConfirm(Model model, HttpSession session) {
-        Expense expense = (Expense) session.getAttribute("expense_insert");
+    public String validateConfirm(HttpSession session, Authentication authentication,
+                                  HttpServletRequest request) {
         if (session.getAttribute("ticket") != null) {
-            budgetService.saveTicketExpense(expense, (Ticket) session.getAttribute("ticket"));
+            ticketRepository.save((Ticket) session.getAttribute("ticket"));
+            return "redirect:/employee/ticket/assigned-tickets";
         }
-        if (session.getAttribute("lead") != null) {
-            budgetService.saveLeadExpense(expense, (Lead) session.getAttribute("lead"));
+        else if (session.getAttribute("lead") != null) {
+            Lead lead = (Lead) session.getAttribute("lead");
+            Lead createdLead = leadService.save(lead);
+            List<Attachment> allFiles = (List<Attachment>) session.getAttribute("all_files");
+            fileUtil.saveFiles(allFiles, createdLead);
+
+            if (lead.getGoogleDrive() != null) {
+                String folderId = (String) session.getAttribute("folder_id");
+                fileUtil.saveGoogleDriveFiles(authentication, allFiles, folderId, createdLead);
+            }
+            if (lead.getStatus().equals("meeting-to-schedule")) {
+                return "redirect:/employee/calendar/create-event?leadId=" + lead.getLeadId();
+            }
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                return "redirect:/employee/lead/created-leads";
+            }
+            return "redirect:/employee/lead/assigned-leads";
         }
-        return "redirect:/budget/all-expense";
+        String referer = request.getHeader("Referer");
+        return "redirect:" + referer;
     }
 }

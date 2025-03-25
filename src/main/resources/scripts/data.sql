@@ -1,2 +1,2 @@
-insert into alert_settings(rate) values (75);
 
+insert into alert_settings(rate) values (75);
