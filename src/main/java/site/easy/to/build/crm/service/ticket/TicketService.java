@@ -3,6 +3,7 @@ package site.easy.to.build.crm.service.ticket;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Ticket;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TicketService {
@@ -20,6 +21,8 @@ public interface TicketService {
 
     public List<Ticket> findCustomerTickets(int id);
 
+    public List<Ticket> getTicketBetween(LocalDateTime startDate, LocalDateTime endDate);
+
     List<Ticket> getRecentTickets(int managerId, int limit);
 
     List<Ticket> getRecentEmployeeTickets(int employeeId, int limit);
@@ -33,4 +36,6 @@ public interface TicketService {
     long countByCustomerCustomerId(int customerId);
 
     void deleteAllByCustomer(Customer customer);
+
+    public double getTotaltTicketAmountForCustomer(Customer customer);
 }

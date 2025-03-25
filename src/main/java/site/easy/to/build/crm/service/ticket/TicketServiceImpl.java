@@ -7,6 +7,7 @@ import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.repository.TicketRepository;
 import site.easy.to.build.crm.entity.Ticket;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,6 +32,18 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public void delete(Ticket ticket) {
         ticketRepository.delete(ticket);
+    }
+    @Override
+    public List<Ticket> getTicketBetween(LocalDateTime startDate, LocalDateTime endDate){
+        if (startDate == null && endDate == null) {
+            return ticketRepository.findAll();
+        } else if (startDate == null) {
+            return ticketRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(endDate);
+        } else if (endDate == null) {
+            return ticketRepository.findByCreatedAtAfterOrderByCreatedAtDesc(startDate);
+        } else {
+            return ticketRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
+        }
     }
 
     @Override
@@ -89,5 +102,10 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public void deleteAllByCustomer(Customer customer) {
         ticketRepository.deleteAllByCustomer(customer);
+    }
+
+    @Override
+    public double getTotaltTicketAmountForCustomer(Customer customer) {
+        return ticketRepository.findTotalAmountByCustomer(customer);
     }
 }
