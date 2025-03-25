@@ -4,18 +4,15 @@
 <div th:insert="~{/general/head.html}"></div>
 <meta name="_csrf" content="${_csrf.token}"/>
 <meta name="_csrf_header" content="${_csrf.headerName}"/>
-
+<link rel="stylesheet" th:href="@{/css/bootstrap-wysihtml5.css}"/>
 <!-- Editable CSS -->
-<link rel="stylesheet" type="text/css"
-      th:href="@{/css/dataTables.bootstrap4.css}">
-<link rel="stylesheet" type="text/css"
-      th:href="@{/css/responsive.dataTables.min.css}">
-<link th:href="@{/css/login-register-lock.css}" rel="stylesheet">
-<link th:href="@{/css/jquery.toast.css}" rel="stylesheet">
+
 <!-- Custom CSS -->
 <link th:href="@{/css/style.min.css}" rel="stylesheet">
 <!-- page css -->
 <link th:href="@{/css/pages/inbox.css}" rel="stylesheet">
+
+<link th:href="@{/css/ribbon-page.css}" rel="stylesheet">
 
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -75,34 +72,50 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <div th:if="${bindingResult != null && bindingResult.hasFieldErrors('failedErrorMessage')}" class="alert alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-                                <h3 class="text-info"><i class="fa fa-exclamation-circle"></i> Not Allowed
-                                </h3><span th:text="${bindingResult.getFieldError('failedErrorMessage').defaultMessage}"></span>
-                            </div>
-                            <h4 class="card-title">Budgets</h4>
-                            <div class="table-responsive m-t-40">
-                                <table id="config-table" class="table display table-bordered table-striped no-wrap">
-                                    <thead>
-                                    <tr>
-                                        <th>#</th>
+                            <h4 class="card-title">Create Budget</h4>
+                            <form th:object="${expense}" th:action="${form_url}" method="post">
 
-                                        <th>Created At</th>
-                                        <th>Amount</th>
-                                        <th>Customer</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:if="${budgets != null}" th:each="budget : ${budgets}">
-                                        <td th:text="${budget.budgetId}"></td>
+                                <label class="m-t-20" for="amount">amount:</label>
+                                <div class="input-group">
+                                    <input type="number" id="amount" th:field="*{amount}" class="form-control">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" autocomplete="off"></span>
+                                </div>
 
-                                        <td th:text="${budget.createdAt}"></td>
-                                        <td th:text="${budget.amount.doubleValue()}"></td>
-                                        <td th:text="${budget.customer.name}"></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                <label class="m-t-20" for="description">description:</label>
+                                <div class="input-group">
+                                    <input type="text" id="description" th:field="*{description}" class="form-control">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}" autocomplete="off"></span>
+                                </div>
+
+                                <label class="m-t-20" for="startDate">Created At:</label>
+                                <div class="input-group">
+                                    <input type="date" id="startDate" th:field="*{createdAt}" class="form-control" placeholder="YYYY-MM-DD" data-date-format="yyyy-mm-dd">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('createdAt')}" th:errors="*{createdAt}"></span>
+                                </div>
+
+                                <label class="m-t-20" for="customerId">Customer:</label>
+                                <div class="input-group">
+                                    <select name="customerId" id="customerId" class="form-control" th:field="*{customer.customerId}">
+                                        <option th:text="${customer.name}" th:value="${customer.customerId}"></option>
+                                    </select>
+                                </div>
+
+                                <label class="m-t-20" for="budgetId">Budget:</label>
+                                <div class="input-group">
+                                    <select name="budgetId" id="budgetId" class="form-control" th:field="*{budget.budgetId}">
+                                        <option th:each="budget : ${budgets}" th:text="${budget.description}" th:value="${budget.budgetId}"></option>
+                                    </select>
+                                </div>
+
+
+                                <button type="submit" class="btn btn-primary m-t-20">Create Budget</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -157,17 +170,79 @@
 <script th:src="@{/js/library/sticky-kit.min.js}"></script>
 <script th:src="@{/js/library/jquery.sparkline.min.js}" type="text/javascript"></script>
 <!--Custom JavaScript -->
-
 <script th:src="@{/js/library/custom.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/library/jquery.toast.js}"></script>
-<script th:src="@{/js/library/toastr.js}"></script>
 <!-- Editable -->
-<script th:src="@{/js/library/jquery.dataTables.min.js}"></script>
-<script th:src="@{/js/library/dataTables.responsive.min.js}"></script>
+
+<script th:src="@{/js/library/wysihtml5-0.3.0.js}"></script>
+<script th:src="@{/js/library/bootstrap-wysihtml5.js}"></script>
 <script>
-    $('#config-table').DataTable({
-        responsive: true
+    $(document).ready(function() {
+        $('.textarea_editor').wysihtml5();
     });
 </script>
+
+<script>
+    // MAterial Date picker
+    $('#mdate').bootstrapMaterialDatePicker({ weekStart: 0, time: false });
+    $('#timepicker').bootstrapMaterialDatePicker({ format: 'HH:mm', time: true, date: false });
+    $('#date-format').bootstrapMaterialDatePicker({ format: 'dddd DD MMMM YYYY - HH:mm' });
+
+    $('#min-date').bootstrapMaterialDatePicker({ format: 'DD/MM/YYYY HH:mm', minDate: new Date() });
+    // Clock pickers
+    $('#single-input').clockpicker({
+        placement: 'bottom',
+        align: 'left',
+        autoclose: true,
+        'default': 'now'
+    });
+    $('.clockpicker').clockpicker({
+        autoclose: true,
+        donetext: 'Done',
+    }).find('input').change(function() {
+        console.log(this.value);
+    });
+    $('#check-minutes').click(function(e) {
+        // Have to stop propagation here
+        e.stopPropagation();
+        input.clockpicker('show').clockpicker('toggleView', 'minutes');
+    });
+    if (/mobile/i.test(navigator.userAgent)) {
+        $('input').prop('readOnly', true);
+    }
+    // Date Picker
+    jQuery('.mydatepicker, #datepicker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    });
+    jQuery('#date-range').datepicker({
+        toggleActive: true
+    });
+    jQuery('#datepicker-inline').datepicker({
+        todayHighlight: true
+    });
+
+    // -------------------------------
+    var input = document.querySelector('#email-input');
+    var tagify = new Tagify(input, {
+        <!--    enforceWhitelist: true,-->
+        whitelist: [], // Specify a predefined list of email suggestions if desired
+        maxTags: Infinity, // Set the maximum number of email tags
+        backspace: 'edit', // Allow editing of tags using the backspace key
+        placeholder: 'Enter emails...', // Placeholder text for the input field
+        dropdown: {
+            enabled: 0, // Disable the email suggestions dropdown
+        },
+    });
+    // Update the email input value when tags are added or removed
+    tagify.on('add', e => updateInputValue());
+    tagify.on('remove', e => updateInputValue());
+
+    function updateInputValue() {
+        var emails = tagify.value.map(tag => tag.value);
+        document.getElementById('emails').value = emails.join(',');
+    }
+
+</script>
+
 </body>
 </html>
