@@ -124,6 +124,14 @@
                                     <input type="checkbox" class="custom-control-input trigger-emails" th:id="googleDrive" th:field="*{googleDrive}">
                                     <label th:for="googleDrive" class="custom-control-label">Upload Docs to your Google Drive</label>
                                 </div>
+
+                                <label class="m-t-20" for="depense">Depense:</label>
+                                <div class="input-group">
+                                    <input type="text" id="depense" th:field="*{depense}" class="form-control">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('depense')}" th:errors="*{depense}" autocomplete="off"></span>
+                                </div>
                                 <button type="submit" class="btn btn-primary m-t-20">Create Lead</button>
                             </form>
                         </div>

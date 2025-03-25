@@ -1,9 +1,9 @@
 package site.easy.to.build.crm.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,6 +14,13 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lead_id")
     private int leadId;
+
+    @Column(name = "expense_amount", nullable = false, precision = 10, scale = 2)
+    @NotNull(message = "Amount is required")
+    @Digits(integer = 10, fraction = 2, message = "Amount must be a valid number with up to 2 decimal places")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Amount must be greater than or equal to 0.00")
+    @DecimalMax(value = "9999999.99", inclusive = true, message = "Amount must be less than or equal to 9999999.99")
+    private BigDecimal depense;
 
     @Column(name = "name")
     @NotBlank(message = "Name is required")
@@ -79,6 +86,14 @@ public class Lead {
         this.employee = employee;
         this.customer = customer;
         this.createdAt = createdAt;
+    }
+
+    public BigDecimal getDepense() {
+        return depense;
+    }
+
+    public void setDepense(BigDecimal depense) {
+        this.depense = depense;
     }
 
     public int getLeadId() {

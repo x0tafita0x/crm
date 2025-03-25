@@ -5,6 +5,7 @@ import site.easy.to.build.crm.entity.User;
 import java.util.List;
 
 public interface UserService {
+    public boolean isManager(User user);
 
     public long countAllUsers();
 

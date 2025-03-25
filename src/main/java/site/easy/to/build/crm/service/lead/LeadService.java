@@ -3,6 +3,7 @@ package site.easy.to.build.crm.service.lead;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Lead;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface LeadService {
@@ -20,7 +21,13 @@ public interface LeadService {
 
     public void delete(Lead lead);
 
+    public double getTotalLeadAmountForCustomer(Customer customer);
+
+
     public List<Lead> getRecentLeads(int mangerId, int limit);
+
+    public List<Lead> getLeadBetween(LocalDateTime startDate, LocalDateTime endDate);
+
     public List<Lead> getCustomerLeads(int customerId);
 
     long countByEmployeeId(int employeeId);

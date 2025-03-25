@@ -1,6 +1,7 @@
 package site.easy.to.build.crm.controller;
 
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -11,10 +12,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.settings.TicketEmailSettingsService;
 import site.easy.to.build.crm.service.ticket.TicketService;
@@ -41,11 +44,13 @@ public class TicketController {
     private final TicketEmailSettingsService ticketEmailSettingsService;
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
+    private final BudgetService budgetService;
 
 
     @Autowired
     public TicketController(TicketService ticketService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
-                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager) {
+                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager,
+                            BudgetService budgetService) {
         this.ticketService = ticketService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -53,6 +58,7 @@ public class TicketController {
         this.ticketEmailSettingsService = ticketEmailSettingsService;
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/show-ticket/{id}")
@@ -79,6 +85,9 @@ public class TicketController {
     @GetMapping("/manager/all-tickets")
     public String showAllTickets(Model model) {
         List<Ticket> tickets = ticketService.findAll();
+        for (Ticket ticket : tickets) {
+            System.out.println(ticket.getCustomer().getName());
+        }
         model.addAttribute("tickets",tickets);
         return "ticket/my-tickets";
     }
@@ -125,8 +134,8 @@ public class TicketController {
     @PostMapping("/create-ticket")
     public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult, @RequestParam("customerId") int customerId,
                                @RequestParam Map<String, String> formParams, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) {
-
+                               @RequestParam("employeeId") int employeeId, Authentication authentication,
+                               RedirectAttributes redirectAttributes, HttpSession session) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
         if(manager == null) {
@@ -169,7 +178,16 @@ public class TicketController {
         ticket.setEmployee(employee);
         ticket.setCreatedAt(LocalDateTime.now());
 
+        if (budgetService.budgetExceeded(ticket)) {
+            session.setAttribute("ticket", ticket);
+            return "redirect:/budget/confirm-expense";
+        }
+
         ticketService.save(ticket);
+
+        if (budgetService.alertRateExceeded(ticket)) {
+            redirectAttributes.addFlashAttribute("alert", "taux d'alerte atteint");
+        }
 
         return "redirect:/employee/ticket/assigned-tickets";
     }
