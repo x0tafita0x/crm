@@ -152,22 +152,22 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/api/**")  // Only applies to /api/**
-            .csrf(csrf -> csrf.disable())  // Disable CSRF for APIs
-            .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/auth/**").permitAll()
-            )
-            .exceptionHandling(e -> e
-            .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            })
-            .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            })
-            )
-            .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // APIs should be stateless
-            );
+                .securityMatcher("/api/**")  // Only applies to /api/**
+                .csrf(csrf -> csrf.disable())  // Disable CSRF for APIs
+                .authorizeHttpRequests(authz -> authz
+                        .anyRequest().permitAll()  // Permit all requests under /api/**
+                )
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        })
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // APIs should be stateless
+                );
 
         return http.build();
     }

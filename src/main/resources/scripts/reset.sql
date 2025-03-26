@@ -1,4 +1,3 @@
-
 delete from customer;
 delete from budget;
 delete from trigger_lead;

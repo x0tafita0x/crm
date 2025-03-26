@@ -86,7 +86,7 @@
 
                                 <label class="m-t-20" for="startDate">Created At:</label>
                                 <div class="input-group">
-                                    <input type="date" id="startDate" th:field="*{createdAt}" class="form-control" placeholder="YYYY-MM-DD" data-date-format="yyyy-mm-dd">
+                                    <input type="datetime-local" id="startDate" th:field="*{createdAt}" class="form-control" placeholder="YYYY-MM-DD" data-date-format="yyyy-mm-dd">
                                 </div>
                                 <div class="input-group">
                                     <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('createdAt')}" th:errors="*{createdAt}"></span>

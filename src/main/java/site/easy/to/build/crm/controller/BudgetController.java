@@ -77,11 +77,12 @@ public class BudgetController {
     }
 
     @GetMapping("/cancel-expense")
-    public String cancelExpense(Model model, HttpSession session) {
+    public String cancelExpense(HttpSession session, HttpServletRequest request) {
         session.removeAttribute("expense_insert");
         session.removeAttribute("ticket");
         session.removeAttribute("lead");
-        return "redirect:/budget/all-expense";
+        String referer = request.getHeader("Referer");
+        return "redirect:" + referer;
     }
 
     @GetMapping("/validate-confirm")

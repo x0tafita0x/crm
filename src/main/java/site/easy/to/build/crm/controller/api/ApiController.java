@@ -35,11 +35,11 @@ public class ApiController {
     @PostMapping("/dashboard")
     public ResponseEntity<?> dashboard(@RequestBody DateParameter request,
                                        @RequestHeader("Authorization") String token) {
-        try {
-            apiLoginService.verifyToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        // try {
+        //     apiLoginService.verifyToken(token);
+        // } catch (Exception e) {
+        //     return ResponseEntity.status(401).body(e.getMessage());
+        // }
 
         DashboardData datas=new DashboardData();
         datas.setLeads(leadService.getLeadBetween(request.getMin(), request.getMax()));
@@ -51,11 +51,11 @@ public class ApiController {
     @PostMapping("/updateLead")
     public ResponseEntity<?> updateLead(@RequestBody Lead request,
                                         @RequestHeader("Authorization") String token) {
-        try {
-            apiLoginService.verifyToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        // try {
+        //     apiLoginService.verifyToken(token);
+        // } catch (Exception e) {
+        //     return ResponseEntity.status(401).body(e.getMessage());
+        // }
 
         try {
             // Find the lead by ID
@@ -84,11 +84,11 @@ public class ApiController {
     @PostMapping("/updateTicket")
     public ResponseEntity<?> updateTicket(@RequestBody Ticket request,
                                           @RequestHeader("Authorization") String token) {
-        try {
-            apiLoginService.verifyToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        // try {
+        //     apiLoginService.verifyToken(token);
+        // } catch (Exception e) {
+        //     return ResponseEntity.status(401).body(e.getMessage());
+        // }
 
         try {
             // Find the ticket by ID
@@ -116,11 +116,11 @@ public class ApiController {
     @GetMapping("/deleteLead/{leadId}")
     public ResponseEntity<?> deleteLead(@PathVariable int leadId,
                                         @RequestHeader("Authorization") String token) {
-        try {
-            apiLoginService.verifyToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        // try {
+        //     apiLoginService.verifyToken(token);
+        // } catch (Exception e) {
+        //     return ResponseEntity.status(401).body(e.getMessage());
+        // }
 
         try {
             Lead lead = leadService.findByLeadId(leadId);
@@ -141,11 +141,11 @@ public class ApiController {
     @GetMapping("/deleteTicket/{ticketId}")
     public ResponseEntity<?> deleteTicket(@PathVariable int ticketId,
                                           @RequestHeader("Authorization") String token) {
-        try {
-            apiLoginService.verifyToken(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        // try {
+        //     apiLoginService.verifyToken(token);
+        // } catch (Exception e) {
+        //     return ResponseEntity.status(401).body(e.getMessage());
+        // }
 
         try {
             // Find the ticket by its ID

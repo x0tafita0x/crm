@@ -10,7 +10,7 @@ BEGIN
             ORDER BY RAND()
             LIMIT 1;
 
-            INSERT INTO budget (description, amount, customer_id, created_at)
+            INSERT INTO budget (amount, customer_id, created_at)
             VALUES (
                        CONCAT('Budget for Customer ', random_customer_id),
                        RAND() * 100000 + 1000000,
@@ -133,6 +133,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- CALL GenerateBudgets(100);
--- CALL GenerateTickets(50);
--- CALL GenerateLeads(50);
+CALL GenerateBudgets(100);
+CALL GenerateTickets(50);
+CALL GenerateLeads(50);
